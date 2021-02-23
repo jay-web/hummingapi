@@ -165,3 +165,60 @@ exports.protect = async (req, res, next) => {
   
     next();
 }
+
+// Middleware to check user is already logged in or not
+
+exports.isLoggedIn = async (req, res, next) => {
+  let token ;
+
+  // Check token is available with request or not
+  if(req.headers && req.headers.authorization){
+    token = req.headers.authorization.split(" ")[1];
+  }else if(req.cookies.jwt){
+    token = req.cookies.jwt
+  }
+  
+  // Step 1 = Check whether token available in header or not
+  if (token) {
+    try {
+      // Step 2 = Verify token
+      // * since jwt.verify accept the callback function which after verifying
+      // * but we are using async await, so we will convert it into to return a promise
+      // * which we can access using await
+      // * using build in util module function promisify
+      const decoded = await promisify(jwt.verify)(
+        token,
+        process.env.JWT_SECRET
+      );
+
+      // Step 3 == Check whether user still exist or not (user deleted after issuing token)
+      const currentUser = await USER.findById(decoded.id);
+      if (!currentUser) {
+       
+        return next();
+      }
+
+      // Step 4 == Check whether user has changed the password after login(after getting token)
+      const passwordChanged = await currentUser.isPasswordChanged(
+        decoded.iat
+      );
+      if (passwordChanged) {
+       
+        return next();
+      }
+
+      // Finally if above steps are fine, so will grant the access
+      // !  Very important passing the user to the request to get used in later middleware
+      res.locals.user = currentUser;
+      req.user = currentUser;
+      
+     
+        return next();
+    } catch (err) {
+      
+      return next();
+    }
+  }
+ 
+  next();
+};

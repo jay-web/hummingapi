@@ -3,7 +3,7 @@ const POST = require("../models/postModel");
 exports.getAllPost = async (req, res, next ) => {
     try{
         let posts = await POST.find({});
-
+        
         res.status(200).json({
             status: "success",
             data:{

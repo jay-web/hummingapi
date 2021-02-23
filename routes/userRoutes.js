@@ -12,6 +12,8 @@ userRoutes.post("/login", authController.login);
 
 userRoutes.get("/logout", authController.logout);
 
+userRoutes.get("/currentUser",  authController.isLoggedIn, userController.currentUser);
+
 
 
 

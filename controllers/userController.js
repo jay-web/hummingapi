@@ -24,7 +24,17 @@ exports.getAllUsers = async (req, res, next) => {
 };
 
 
-// Middleware to 
+// Middleware to get current user
+
+exports.currentUser = async  (req, res, next) => {
+  // console.log(req.user);
+  return res.status(200).json({
+    status: "success",
+    data:{
+      user: req.user
+    }
+  })
+}
 
 
 
