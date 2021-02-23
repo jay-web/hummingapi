@@ -1,5 +1,6 @@
 const express = require("express");
 const userRoutes = require("./routes/userRoutes");
+const postRoutes = require("./routes/postRoutes");
 const app = express();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -17,6 +18,7 @@ app.get("/api/v1/chats", (req, res, next) => {
 })
 
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/post", postRoutes);
 
 
 

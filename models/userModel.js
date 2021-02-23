@@ -91,6 +91,17 @@ userSchema.methods.correctPassword = async function(enteredPassword, candidatePa
   return bcrypt.compare(enteredPassword, candidatePassword);
 }
 
+// To check whether user changed the password after login or not
+
+userSchema.methods.isPasswordChanged = async function(JWTTimeStamp) {
+  if(this.passwordChangedAt){
+    let passwordChanged = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+
+    return JWTTimeStamp < passwordChanged     // return true means password changed
+  }
+  return false;   // means password don't get changed
+}
+
 
 
 const USER = mongoose.model("User", userSchema);
