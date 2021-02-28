@@ -16,6 +16,11 @@ const postSchema = new mongoose.Schema({
 });
 
 
+postSchema.pre(/^find/, function(next){
+    this.populate({path: "postBy"});
+    next();
+})
+
 const POST = mongoose.model("Post", postSchema);
 
 

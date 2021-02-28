@@ -9,5 +9,9 @@ postRoutes.get("/", authController.protect, postController.getAllPost);
 
 postRoutes.post("/", authController.protect, postController.createPost);
 
+postRoutes.post("/search", authController.protect, postController.searchPost);
+
+postRoutes.delete("/", authController.protect, postController.deletePost);
+
 
 module.exports = postRoutes;

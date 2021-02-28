@@ -1,11 +1,11 @@
 const USER = require("../models/userModel");
+const catchAsync = require("../utils/catchAsync");
 
 
 
 // Middleware to get all users
-exports.getAllUsers = async (req, res, next) => {
+exports.getAllUsers = catchAsync(async (req, res, next) => {
   
-  try{
     const allUsers = await USER.find({});
     return res.status(200).json({
       status: "success",
@@ -14,19 +14,12 @@ exports.getAllUsers = async (req, res, next) => {
         users: allUsers,
       },
     });
-  }catch(error){
-    res.status(500).json({
-      status: "failed",
-      message: error.message
-    })
-  }
-  
-};
+});
 
 
 // Middleware to get current user
 
-exports.currentUser = async  (req, res, next) => {
+exports.currentUser = catchAsync(async (req, res, next) => {
   // console.log(req.user);
   return res.status(200).json({
     status: "success",
@@ -34,7 +27,7 @@ exports.currentUser = async  (req, res, next) => {
       user: req.user
     }
   })
-}
+})
 
 
 

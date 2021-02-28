@@ -5,6 +5,8 @@ const app = express();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
+const globalErrorHandler = require("./controllers/errorController");
+
 
 app.use(cors());
 app.use(cookieParser());
@@ -20,6 +22,9 @@ app.get("/api/v1/chats", (req, res, next) => {
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/post", postRoutes);
 
+
+// Middleware to handle global error
+app.use(globalErrorHandler);
 
 
 

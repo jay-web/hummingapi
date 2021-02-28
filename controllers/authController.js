@@ -2,6 +2,10 @@ const USER = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
 
+const catchAsync = require("../utils/catchAsync");
+const AppError = require("../utils/appError");
+const app = require("../app");
+
 //  CREATE THE TOKEN TO SEND FOR AUTHENTICATION
 const createToken = (userId) => {
   return jwt.sign({ id: userId, name: "humming" }, process.env.JWT_SECRET, {
@@ -40,9 +44,8 @@ const sendToken = async (user, req, res, statusCode) => {
 };
 
 // Middleware For signup
-exports.createUser = async (req, res, next) => {
-  console.log(req.body);
-  try {
+exports.createUser = catchAsync(async (req, res, next) => {
+ 
     const { name, username, email, password, passwordConfirm } = req.body;
     const userInfo = {
       name,
@@ -55,26 +58,18 @@ exports.createUser = async (req, res, next) => {
     const newUser = await USER.create(userInfo);
 
     sendToken(newUser, req, res, 201)
-  } catch (error) {
-    res.status(500).json({
-      status: "failed",
-      message: error.message,
-    });
-  }
-};
+
+});
 
 // Middleware for login
-exports.login = async (req, res, next) => {
-  try {
+exports.login = catchAsync(async (req, res, next) => {
+ 
     const { username, password } = req.body;
     console.log(username, password);
 
     // Check username and password both are provided by user
     if (!username || !password) {
-      return res.status(400).json({
-        status: "failed",
-        message: "Please provide username and password",
-      });
+      return next( new AppError("Please provide username and password",401));
     }
 
     // Check provided details are valid or not
@@ -86,20 +81,12 @@ exports.login = async (req, res, next) => {
     );
 
     if (!user || !isPasswordCorrect) {
-      return res.status(401).json({
-        status: "failed",
-        message: "Incorrect Username or password",
-      });
+      return next(new AppError("Incorrect Username or password", 401));
     }
     
     sendToken(user, req, res, 201)
-  } catch (error) {
-    res.status(500).json({
-      status: "failed",
-      message: error.message,
-    });
-  }
-};
+  
+});
 
 // Middleware for log out
 exports.logout = async (req, res, next) => {
@@ -111,14 +98,12 @@ exports.logout = async (req, res, next) => {
     res.user = null;
     res.status(200).json({
         status: "success",
-       
-
     })
 }
 
 // Middleware to apply login feature other middlware i.e protect
 
-exports.protect = async (req, res, next) => {
+exports.protect = catchAsync (async (req, res, next) => {
 
     let token ;
 
@@ -131,10 +116,7 @@ exports.protect = async (req, res, next) => {
 
     // if token is not available
     if(!token){
-      return res.status(401).json({
-        status: "failed",
-        message: "You are not logged in, please login"
-      })
+      return next(new AppError("You are not logged in, please login", 401));
     }
 
     // if token is available, check the token validation
@@ -144,19 +126,14 @@ exports.protect = async (req, res, next) => {
 
     let currentUser = await USER.findById(decoded.id);
     if(!currentUser){
-      return res.status(401).json({
-        status: "failed",
-        message: "User belongs to token is not exist now !!"
-      })
+      return next(new AppError("User belongs to token is not exist now !!", 401));
     }
 
     // Check password get changed after login or not
     const passwordChanged = await currentUser.isPasswordChanged(decoded.iat);
     if(passwordChanged){
-      return res.status(401).json({
-        status: "failed",
-        message: "User has changed the password, please login again !!!"
-      })
+      return next(new AppError("User has changed the password, please login again !!!", 401));
+      
     }
 
     // if everything seems fine, passed to the next middleware
@@ -164,7 +141,7 @@ exports.protect = async (req, res, next) => {
     res.locals.user = currentUser;
   
     next();
-}
+});
 
 // Middleware to check user is already logged in or not
 
