@@ -63,6 +63,10 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: "default.jpg",
     },
+    likes:[{
+      type: mongoose.Schema.ObjectId,
+      ref: "Post"
+    }]
   },
   {
     toJSON: { virtuals: true },

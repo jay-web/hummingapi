@@ -5,11 +5,14 @@ const postRoutes = express.Router();
 
 
 
+
 postRoutes.get("/", authController.protect, postController.getAllPost);
 
 postRoutes.post("/", authController.protect, postController.createPost);
 
 postRoutes.post("/search", authController.protect, postController.searchPost);
+
+postRoutes.patch("/", authController.protect, postController.likePost);
 
 postRoutes.delete("/", authController.protect, postController.deletePost);
 
